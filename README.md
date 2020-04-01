@@ -1,0 +1,2 @@
+# functions_resize_vmshape
+Oracle Functionsを利用したVMの動的なシェイプ変更

@@ -43,9 +43,9 @@ def handler(ctx, data: io.BytesIO = None):
         ocpu = cfg["OCPU"]
         memory = cfg["OCPU"]
         add_ocpu = ocpu if ocpu is not None and float(
-            add_ocpu) else "1.0"
+            ocpu) else "1.0"
         add_memory = memory if memory is not None and float(
-            add_memory) else "1.0"
+            memory) else "1.0"
     except Exception as ex:
         print('ERROR: Missing Message ID in the header', ex, flush=True)
         raise

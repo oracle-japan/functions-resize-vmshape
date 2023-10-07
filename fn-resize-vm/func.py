@@ -5,7 +5,7 @@ import oci
 from fdk import response
 
 
-def increase_compute_memory(instance_id, add_ocpu, add_memory):
+def increase_compute_shapes(instance_id, add_ocpu, add_memory):
     signer = oci.auth.signers.get_resource_principals_signer()
     compute_client = oci.core.ComputeClient(config={}, signer=signer)
 
@@ -66,7 +66,7 @@ def handler(ctx, data: io.BytesIO = None):
             alarm_metric_dimension = alarm_msg["alarmMetaData"][0]["dimensions"][0]
             print("INFO: Instance to resize: ",
                   alarm_metric_dimension["resourceId"], flush=True)
-            func_response = increase_compute_memory(
+            func_response = increase_compute_shapes(
                 alarm_metric_dimension["resourceId"], float(add_ocpu), float(add_memory))
             print("INFO: ", func_response, flush=True)
         else:

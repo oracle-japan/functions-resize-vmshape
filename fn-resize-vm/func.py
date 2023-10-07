@@ -40,8 +40,12 @@ def handler(ctx, data: io.BytesIO = None):
     try:
         headers = ctx.Headers()
         message_id = headers["x-oci-ns-messageid"]
-        add_ocpu = cfg["OCPU"] if cfg["OCPU"] is not None else "1.0"
-        add_memory = cfg["MEMORY"] if cfg["MEMORY"] is not None else "1.0"
+        ocpu = cfg["OCPU"]
+        memory = cfg["OCPU"]
+        add_ocpu = ocpu if ocpu is not None and isinstance(
+            ocpu, float) else "1.0"
+        add_memory = memory if memory is not None and isinstance(
+            memory, float) else "1.0"
     except Exception as ex:
         print('ERROR: Missing Message ID in the header', ex, flush=True)
         raise
@@ -63,7 +67,7 @@ def handler(ctx, data: io.BytesIO = None):
             print("INFO: Instance to resize: ",
                   alarm_metric_dimension["resourceId"], flush=True)
             func_response = increase_compute_memory(
-                alarm_metric_dimension["resourceId"], add_ocpu, add_memory)
+                alarm_metric_dimension["resourceId"], float(add_ocpu), float(add_memory))
             print("INFO: ", func_response, flush=True)
         else:
             print('ERROR: There is no metric dimension in this alarm message', flush=True)

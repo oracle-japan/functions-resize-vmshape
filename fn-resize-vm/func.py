@@ -41,7 +41,7 @@ def handler(ctx, data: io.BytesIO = None):
         headers = ctx.Headers()
         message_id = headers["x-oci-ns-messageid"]
         ocpu = cfg["OCPU"]
-        memory = cfg["OCPU"]
+        memory = cfg["MEMORY"]
         add_ocpu = ocpu if ocpu is not None and float(
             ocpu) else "1.0"
         add_memory = memory if memory is not None and float(

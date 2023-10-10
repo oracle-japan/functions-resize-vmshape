@@ -36,6 +36,7 @@ def handler(ctx, data: io.BytesIO = None):
     alarm_msg = {}
     message_id = func_response = ""
     cfg = ctx.Config()
+    print(str(ctx.Config()))
 
     try:
         headers = ctx.Headers()

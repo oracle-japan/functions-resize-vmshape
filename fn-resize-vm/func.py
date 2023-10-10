@@ -81,6 +81,3 @@ def handler(ctx, data: io.BytesIO = None):
         response_data=func_response,
         headers={"Content-Type": "application/json"}
     )
-
-
-"01HCBRSE0T1BT0A48ZJ0003S1C - fn - ERROR - local variable 'ocpu' referenced before assignment:  File \"/python/fdk/runner.py\", line 74, in handle_request\\n    response_data = await with_deadline(ctx, handler_code, body)\\n  File \"/python/fdk/runner.py\", line 54, in with_deadline\\n    raise ex\\n  File \"/python/fdk/runner.py\", line 48, in with_deadline\\n    result = handle_func(ctx, data=data)\\n  File \"/function/func.py\", line 52, in handler\\n    print('INFO: add_ocpu', ocpu, flush=True)\\n"

@@ -36,14 +36,17 @@ def handler(ctx, data: io.BytesIO = None):
     alarm_msg = {}
     message_id = func_response = ""
     cfg = ctx.Config()
+    ocpu = 1.0
+    memory = 1.0
 
     try:
         headers = ctx.Headers()
         message_id = headers["x-oci-ns-messageid"]
-        if not "OCPU" in cfg.keys():
-            ocpu = 1.0
-        if not "MEMORY" in cfg.keys():
-            memory = 1.0
+        print(cfg.keys())
+        if "OCPU" in cfg.keys():
+            ocpu = cfg["OCPU"]
+        if "MEMORY" in cfg.keys():
+            memory = cfg["MEMORY"]
     except Exception as ex:
         print('ERROR: Missing Items', ex, flush=True)
         raise

@@ -42,11 +42,10 @@ def handler(ctx, data: io.BytesIO = None):
     try:
         headers = ctx.Headers()
         message_id = headers["x-oci-ns-messageid"]
-        print(cfg.keys())
         if "OCPU" in cfg.keys():
             ocpu = cfg["OCPU"]
         if "MEMORY" in cfg.keys():
-            memory = cfg["MEMORY"]
+            ocpu = cfg["MEMORY"]
     except Exception as ex:
         print('ERROR: Missing Items', ex, flush=True)
         raise
@@ -82,3 +81,6 @@ def handler(ctx, data: io.BytesIO = None):
         response_data=func_response,
         headers={"Content-Type": "application/json"}
     )
+
+
+"01HCBRSE0T1BT0A48ZJ0003S1C - fn - ERROR - local variable 'ocpu' referenced before assignment:  File \"/python/fdk/runner.py\", line 74, in handle_request\\n    response_data = await with_deadline(ctx, handler_code, body)\\n  File \"/python/fdk/runner.py\", line 54, in with_deadline\\n    raise ex\\n  File \"/python/fdk/runner.py\", line 48, in with_deadline\\n    result = handle_func(ctx, data=data)\\n  File \"/function/func.py\", line 52, in handler\\n    print('INFO: add_ocpu', ocpu, flush=True)\\n"

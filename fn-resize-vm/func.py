@@ -36,7 +36,8 @@ def handler(ctx, data: io.BytesIO = None):
     alarm_msg = {}
     message_id = func_response = ""
     cfg = ctx.Config()
-    print(str(ctx.Config()))
+    print(cfg["OCPU"])
+    print(cfg["MEMORY"])
 
     try:
         headers = ctx.Headers()

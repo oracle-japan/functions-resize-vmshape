@@ -45,7 +45,7 @@ def handler(ctx, data: io.BytesIO = None):
         if "OCPU" in cfg.keys():
             ocpu = cfg["OCPU"]
         if "MEMORY" in cfg.keys():
-            ocpu = cfg["MEMORY"]
+            memory = cfg["MEMORY"]
     except Exception as ex:
         print('ERROR: Missing Items', ex, flush=True)
         raise

@@ -43,7 +43,7 @@ def handler(ctx, data: io.BytesIO = None):
             ocpu = float(cfg["OCPU"])
         if "MEMORY" in cfg.keys():
             memory = float(cfg["MEMORY"])
-    except:
+    except Exception as ex:
         print('ERROR: OCPU or MEMORY must be type float', ex, flush=True)
         raise
 

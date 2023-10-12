@@ -38,14 +38,18 @@ def handler(ctx, data: io.BytesIO = None):
     cfg = ctx.Config()
     ocpu = 1.0
     memory = 1.0
+    try:
+        if "OCPU" in cfg.keys():
+            ocpu = float(cfg["OCPU"])
+        if "MEMORY" in cfg.keys():
+            memory = float(cfg["MEMORY"])
+    except:
+        print('ERROR: OCPU or MEMORY must be type float', ex, flush=True)
+        raise
 
     try:
         headers = ctx.Headers()
         message_id = headers["x-oci-ns-messageid"]
-        if "OCPU" in cfg.keys():
-            ocpu = cfg["OCPU"]
-        if "MEMORY" in cfg.keys():
-            memory = cfg["MEMORY"]
     except Exception as ex:
         print('ERROR: Missing Items', ex, flush=True)
         raise
@@ -67,7 +71,7 @@ def handler(ctx, data: io.BytesIO = None):
             print("INFO: Instance to resize: ",
                   alarm_metric_dimension["resourceId"], flush=True)
             func_response = increase_compute_shapes(
-                alarm_metric_dimension["resourceId"], float(ocpu), float(memory))
+                alarm_metric_dimension["resourceId"], ocpu, memory)
             print("INFO: ", func_response, flush=True)
         else:
             print('ERROR: There is no metric dimension in this alarm message', flush=True)

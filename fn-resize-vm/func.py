@@ -4,41 +4,60 @@ import oci
 
 from fdk import response
 
-def increase_compute_shape(instance_id, alarm_msg_shape):
+
+def increase_compute_shapes(instance_id, add_ocpu, add_memory):
     signer = oci.auth.signers.get_resource_principals_signer()
     compute_client = oci.core.ComputeClient(config={}, signer=signer)
-    current_shape = compute_client.get_instance(instance_id).data.shape
-    print("INFO: current shape for Instance {0}: {1}".format(instance_id,current_shape), flush=True)
-    if current_shape != alarm_msg_shape:
-        return "The shape of Instance {} differs from the Alarm message".format(instance_id)
-    # improve the logic below to handle more scenarios, make sure the shapes you select are available in the region and AD
-    if  current_shape == "VM.Standard1.1":
-        new_shape = "VM.Standard2.1"
-    elif current_shape == "VM.Standard2.1":
-        new_shape = "VM.Standard2.2"
-    else:
-        return "Instance {0} cannot get a bigger shape than its current shape {1}".format(instance_id,current_shape)
-    print("INFO: new shape for Instance {0}: {1}".format(instance_id,new_shape), flush=True)
+
+    current_ocpus = compute_client.get_instance(
+        instance_id).data.shape_config.ocpus
+    current_memory = compute_client.get_instance(
+        instance_id).data.shape_config.memory_in_gbs
+
+    print("INFO: current ocpu and memory for Instance {0}: ocpu:{1} memory:{2}".format(
+        instance_id, current_ocpus, current_memory), flush=True)
+
     try:
-        update_instance_details = oci.core.models.UpdateInstanceDetails(shape=new_shape)
-        resp = compute_client.update_instance(instance_id=instance_id, update_instance_details=update_instance_details)
-        print(resp, flush=True)
+        shape_config = oci.core.models.UpdateInstanceShapeConfigDetails(
+            ocpus=current_ocpus + add_ocpu, memory_in_gbs=current_memory + add_memory)
+        update_instance_details = oci.core.models.UpdateInstanceDetails(
+            shape_config=shape_config)
+        resp = compute_client.update_instance(
+            instance_id=instance_id, update_instance_details=update_instance_details)
+        print(resp.data, resp.status, flush=True)
     except Exception as ex:
         print('ERROR: cannot update instance {}'.format(instance_id), flush=True)
         raise
+
     return "The shape of Instance {} is updated, the instance is rebooting...".format(instance_id)
 
-def handler(ctx, data: io.BytesIO=None):
+
+def handler(ctx, data: io.BytesIO = None):
     alarm_msg = {}
     message_id = func_response = ""
+    cfg = ctx.Config()
+    ocpu = 1.0
+    memory = 1.0
+    try:
+        if "OCPU" in cfg.keys():
+            ocpu = float(cfg["OCPU"])
+        if "MEMORY" in cfg.keys():
+            memory = float(cfg["MEMORY"])
+    except Exception as ex:
+        print('ERROR: OCPU or MEMORY must be type float', ex, flush=True)
+        raise
+
     try:
         headers = ctx.Headers()
         message_id = headers["x-oci-ns-messageid"]
     except Exception as ex:
-        print('ERROR: Missing Message ID in the header', ex, flush=True)
+        print('ERROR: Missing Items', ex, flush=True)
         raise
+    print('INFO: headers', headers, flush=True)
     print("INFO: Message ID = ", message_id, flush=True)
-    # the Message Id can be stored in a database and be used to check for duplicate messages
+    print('INFO: add_ocpu', ocpu, flush=True)
+    print('INFO: add_memory', memory, flush=True)
+
     try:
         alarm_msg = json.loads(data.getvalue())
         print("INFO: Alarm message: ")
@@ -48,9 +67,11 @@ def handler(ctx, data: io.BytesIO=None):
 
     if alarm_msg["type"] == "OK_TO_FIRING":
         if alarm_msg["alarmMetaData"][0]["dimensions"]:
-            alarm_metric_dimension = alarm_msg["alarmMetaData"][0]["dimensions"][0]   #assuming the first dimension matches the instance to resize
-            print("INFO: Instance to resize: ", alarm_metric_dimension["resourceId"], flush=True)
-            func_response = increase_compute_shape(alarm_metric_dimension["resourceId"], alarm_metric_dimension["shape"])
+            alarm_metric_dimension = alarm_msg["alarmMetaData"][0]["dimensions"][0]
+            print("INFO: Instance to resize: ",
+                  alarm_metric_dimension["resourceId"], flush=True)
+            func_response = increase_compute_shapes(
+                alarm_metric_dimension["resourceId"], ocpu, memory)
             print("INFO: ", func_response, flush=True)
         else:
             print('ERROR: There is no metric dimension in this alarm message', flush=True)
@@ -60,7 +81,7 @@ def handler(ctx, data: io.BytesIO=None):
         func_response = "Nothing to do, alarm is not FIRING"
 
     return response.Response(
-        ctx, 
+        ctx,
         response_data=func_response,
         headers={"Content-Type": "application/json"}
     )

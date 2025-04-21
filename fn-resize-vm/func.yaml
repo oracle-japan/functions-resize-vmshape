@@ -2,5 +2,6 @@ schema_version: 20180708
 name: fn-resize-vm
 version: 0.0.8
 runtime: python
+container-enginetype: podman
 entrypoint: /python/bin/fdk /function/func.py handler
 memory: 256
